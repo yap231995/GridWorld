@@ -130,6 +130,8 @@ class Policy_Iteration_Agent(Agent):
                     if old_action != self.Policy[row][col]:
                         policy_stable =False
 
+    def learned_act(self,state):
+        return self.Policy[state[0]][state[1]]
 
 
 
