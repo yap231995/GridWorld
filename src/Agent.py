@@ -42,14 +42,15 @@ class Policy_Iteration_Agent(Agent):
             return 0
 
     def move(self, old_state, action):
+        reward = -1
         if old_state[0] == 0 and action == "Up":
-            return old_state
+            return old_state, reward
         elif old_state[0] == self.Rows-1  and action == "Down":
-            return old_state
+            return old_state, reward
         elif old_state[1] == self.Columns-1  and action == "Right":
-            return old_state
+            return old_state, reward
         elif old_state[1] == 0  and action == "Left":
-            return old_state
+            return old_state, reward
         else:
             new_state = []
             new_state.append(old_state[0])
@@ -62,10 +63,10 @@ class Policy_Iteration_Agent(Agent):
                 new_state[1] = old_state[1] + 1
             elif action == "Left":
                 new_state[1] = old_state[1] - 1
-            return new_state
+            return new_state,reward
 
     def Transitional_Probability(self, new_state, old_state, action): #p(s',r|s,a)
-        state_after_action = self.move(old_state,action)
+        state_after_action,reward = self.move(old_state,action)
         if old_state == (0,0) or old_state == (self.Rows-1,self.Columns-1): #At the Goal
             return 0
         if state_after_action == new_state:
@@ -77,33 +78,22 @@ class Policy_Iteration_Agent(Agent):
         V = 0
         if state == [0,0] or state == [self.Rows-1,self.Columns-1]:
             return V
+        #Alternative:
         # for action in self.actions_set:
+        #     new_state,reward = self.move(state,action)
+        #     V += (self.Transitional_Probability(new_state=new_state, old_state=state,
+        #                                         action=action) * (reward + self.discount * self.Value_Functions[new_state[0],new_state[1]]))
+
         for row in range(self.Rows):
             for col in range(self.Columns):
                 new_state = [row,col]
-                V += (self.Transitional_Probability(new_state = new_state,old_state= state,action = self.Policy[state[0]][state[1]])*(-1 + self.discount*self.Value_Functions[row, col]))
+                action = self.Policy[state[0]][state[1]]
+                _,reward = self.move(state,action)
+                V += (self.Transitional_Probability(new_state = new_state,old_state= state,action = action)*(reward + self.discount*self.Value_Functions[row, col]))
         return V
 
 
-    def Iterative_Policy_Evaluation(self, threshold, steps =10):
-        counter = 0
-        while True:
-            Difference = 0
-            for row in range(self.Value_Functions.shape[0]):
-                for col in range(self.Value_Functions.shape[1]):
-                    V_old = self.Value_Functions[row,col]
-                    V_new = self.Bellman_StateValueFunction([row,col])
-                    self.Value_Functions[row, col] = V_new
-                    self.Print_Value_Functions()
-                    Difference = max(Difference,abs(V_old - V_new))
-                    print("Difference:" + str(Difference))
-            counter +=1
-            if (Difference <= threshold) or counter > steps:
-                break
-
-
-
-    def Initilize_Policy(self):
+    def Initialize_Policy(self):
         for row in range(self.Rows):
             row_lst = []
             for col in range(self.Columns):
@@ -123,8 +113,23 @@ class Policy_Iteration_Agent(Agent):
             if V > max_state_value:
                 max_state_value = V
                 best_action = action
-
         return best_action
+
+    def Iterative_Policy_Evaluation(self, threshold, steps =10):
+        counter = 0
+        while True:
+            Difference = 0
+            for row in range(self.Value_Functions.shape[0]):
+                for col in range(self.Value_Functions.shape[1]):
+                    V_old = self.Value_Functions[row,col]
+                    V_new = self.Bellman_StateValueFunction([row,col])
+                    self.Value_Functions[row, col] = V_new
+                    self.Print_Value_Functions()
+                    Difference = max(Difference,abs(V_old - V_new))
+                    print("Difference:" + str(Difference))
+            counter +=1
+            if (Difference <= threshold) or counter > steps:
+                break
 
     def Policy_Improvement(self,threshold,steps):
         self.Initilize_Policy()
@@ -153,3 +158,112 @@ class Policy_Iteration_Agent(Agent):
     def Print_Value_Functions(self):
         print("Current Value Functions:")
         print(self.Value_Functions)
+
+
+class Value_Iteration_Agent(Agent):
+    def __init__(self, epsilon, discount, Rows, Columns):
+        self.Rows = Rows
+        self.Columns = Columns
+        super().__init__(epsilon)
+        self.Value_Functions = np.zeros((Rows, Columns))
+        self.Policy = self.Initialize_Policy()
+        self.discount = discount
+
+    def pi(self, state, action):
+        if len(self.Policy) == 0:
+            return 1 / len(self.actions_set)  ##No policy in place all actions are equiprobable
+        elif self.Policy[state[0]][state[1]] == action:
+            return 1
+        else:
+            return 0
+
+    def move(self, old_state, action):
+        reward = -1
+        if old_state[0] == 0 and action == "Up":
+            return old_state, reward
+        elif old_state[0] == self.Rows - 1 and action == "Down":
+            return old_state, reward
+        elif old_state[1] == self.Columns - 1 and action == "Right":
+            return old_state, reward
+        elif old_state[1] == 0 and action == "Left":
+            return old_state, reward
+        else:
+            new_state = []
+            new_state.append(old_state[0])
+            new_state.append(old_state[1])
+            if action == "Up":
+                new_state[0] = old_state[0] - 1
+            elif action == "Down":
+                new_state[0] = old_state[0] + 1
+            elif action == "Right":
+                new_state[1] = old_state[1] + 1
+            elif action == "Left":
+                new_state[1] = old_state[1] - 1
+            return new_state, reward
+
+    def Initialize_Policy(self):
+        Policy = []
+        for row in range(self.Rows):
+            row_lst = []
+            for col in range(self.Columns):
+                y = random.choice(self.actions_set)
+                row_lst.append(y)
+            Policy.append(row_lst)
+        return Policy
+
+    def Transitional_Probability(self, new_state, old_state, action):  # p(s',r|s,a)
+        state_after_action, reward = self.move(old_state, action)
+        if old_state == (0, 0) or old_state == (self.Rows - 1, self.Columns - 1):  # At the Goal
+            return 0
+        if state_after_action == new_state:
+            return 1
+        return 0
+
+    def Bellman_Optimal_StateValueFunction(self, state):
+        Max_State_Value = float("-inf")
+        if state == [0,0] or state == [self.Rows-1,self.Columns-1]:
+
+            return 0, None
+        optimal_policy = None
+        for action in self.actions_set:
+            new_state,reward = self.move(state,action)
+            V = (self.Transitional_Probability(new_state=new_state, old_state=state,
+                                                action=action) * (reward + self.discount * self.Value_Functions[new_state[0],new_state[1]]))
+            if V > Max_State_Value:
+                Max_State_Value = V
+                optimal_policy = action
+        return Max_State_Value, optimal_policy
+
+
+
+    def Value_Iteration(self,threshold,steps):
+        counter = 0
+        while True:
+            Difference = 0
+            for row in range(self.Value_Functions.shape[0]):
+                for col in range(self.Value_Functions.shape[1]):
+                    V_old = self.Value_Functions[row,col]
+                    V_new,optimal_policy = self.Bellman_Optimal_StateValueFunction([row,col])
+                    self.Value_Functions[row, col] = V_new
+                    self.Policy[row][col] = optimal_policy
+                    self.Print_Value_Functions()
+                    self.Print_Policy()
+                    Difference = max(Difference,abs(V_old - V_new))
+                    print("Difference:" + str(Difference))
+            counter +=1
+            if (Difference <= threshold) or counter > steps:
+                break
+
+    def learned_act(self, state):
+        return self.Policy[state[0]][state[1]]
+
+    def Print_Policy(self):
+        print("Current Policy:")
+        for row in range(self.Rows):
+            print(self.Policy[row])
+    def Print_Value_Functions(self):
+        print("Current Value Functions:")
+        print(self.Value_Functions)
+
+
+
