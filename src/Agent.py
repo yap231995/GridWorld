@@ -69,6 +69,7 @@ class Policy_Iteration_Agent(Agent):
         if old_state == (0,0) or old_state == (self.Rows-1,self.Columns-1): #At the Goal
             return 0
         if state_after_action == new_state:
+            print("ok")
             return 1
         return 0
 
@@ -85,8 +86,8 @@ class Policy_Iteration_Agent(Agent):
         return V
 
 
-    def Iterative_Policy_Evaluation(self, threshold):
-
+    def Iterative_Policy_Evaluation(self, threshold, steps =10):
+        # counter = 0
         while True:
             Difference = 0
             for row in range(self.Value_Functions.shape[0]):
@@ -97,7 +98,8 @@ class Policy_Iteration_Agent(Agent):
                     self.Print_Value_Functions()
                     Difference = max(Difference,abs(V_old - V_new))
                     print("Difference:" + str(Difference))
-            if (Difference <= threshold):
+            # counter +=1
+            if (Difference <= threshold):# or counter > steps:
                 break
 
 
@@ -109,10 +111,6 @@ class Policy_Iteration_Agent(Agent):
                 y = random.choice(self.actions_set)
                 row_lst.append(y)
             self.Policy.append(row_lst)
-        # for row in range(self.Rows):
-        #     for col in range(self.Columns):
-        #         V_new = self.Bellman_StateValueFunction([row, col])
-        #         self.Value_Functions[row, col] = V_new
 
     def MaxAction(self, state):
         best_action = None
@@ -129,11 +127,11 @@ class Policy_Iteration_Agent(Agent):
 
         return best_action
 
-    def Policy_Improvement(self,threshold):
+    def Policy_Improvement(self,threshold,steps):
         self.Initilize_Policy()
         policy_stable = False
         while policy_stable == False:
-            self.Iterative_Policy_Evaluation(threshold)
+            self.Iterative_Policy_Evaluation(threshold, steps)
             self.Print_Value_Functions()
             policy_stable = True
             for row in range(self.Rows):
