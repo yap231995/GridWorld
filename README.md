@@ -1,4 +1,4 @@
-#GridWorld
+# GridWorld
 
 Implement the GridWorld as describe in [Reinforcement Learning: An Introduction 2nd Edition](https://www.amazon.co.jp/exec/obidos/ASIN/0262039249/hatena-blog-22/)
 Chapter 4 page 76.<br>
