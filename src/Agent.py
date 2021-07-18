@@ -69,7 +69,6 @@ class Policy_Iteration_Agent(Agent):
         if old_state == (0,0) or old_state == (self.Rows-1,self.Columns-1): #At the Goal
             return 0
         if state_after_action == new_state:
-            print("ok")
             return 1
         return 0
 
@@ -87,7 +86,7 @@ class Policy_Iteration_Agent(Agent):
 
 
     def Iterative_Policy_Evaluation(self, threshold, steps =10):
-        # counter = 0
+        counter = 0
         while True:
             Difference = 0
             for row in range(self.Value_Functions.shape[0]):
@@ -98,8 +97,8 @@ class Policy_Iteration_Agent(Agent):
                     self.Print_Value_Functions()
                     Difference = max(Difference,abs(V_old - V_new))
                     print("Difference:" + str(Difference))
-            # counter +=1
-            if (Difference <= threshold):# or counter > steps:
+            counter +=1
+            if (Difference <= threshold) or counter > steps:
                 break
 
 
