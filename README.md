@@ -9,10 +9,10 @@ Agent is randomly placed in the Grid.<br>
 We want to see what is fastest way to get to the corner.<br>
 Model in a way such that with each steps, the reward given is -1.
 
-##1. Policy Iteration
+## 1. Policy Iteration
 [1] Policy Evaluation<br>
 [2] Policy Improvement
 
-##2. Value Iteration
+## 2. Value Iteration
 All PseudoCode and Equations can also be found in the book.
 Both are found in the Agent.py 
