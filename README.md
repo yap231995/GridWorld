@@ -18,7 +18,7 @@ Here, we implement the iterative approach stated in the book as an approximation
 
 
 ## 2. Value Iteration
-[1] Using the Bellman Optimal Equations
+[1] Using the Bellman Optimal Equations <br>
 This does both Policy Evaluation and Improvement at the same time. 
 
 
